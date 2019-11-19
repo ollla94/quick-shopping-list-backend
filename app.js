@@ -3,6 +3,7 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const multer = require('multer');
+const config = require('./config.json');
 
 const recepiesRoutes = require('./routes/recepies');
 const shoppingListRoutes = require('./routes/shoppingList');
@@ -16,7 +17,7 @@ const app = express();
 
 const fileStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-    cb(null, 'images');
+    cb(null, config.images_dir);
   },
   filename: (req, file, cb) => {
     cb(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);
@@ -37,7 +38,7 @@ const fileFilter = (req, file, cb) => {
 
 app.use(bodyParser.json());
 app.use(multer({storage: fileStorage, fileFilter: fileFilter}).single('image'))
-app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/images', express.static(config.images_dir));
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');

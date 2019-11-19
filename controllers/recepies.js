@@ -1,6 +1,10 @@
+const path = require('path');
+
 const Recepie = require('../models/recepie');
 const Ingredient = require('../models/ingredient');
 const file = require('../file');
+
+const config = require('../config.json');
 
 const { validationResult } = require('express-validator');
 
@@ -72,7 +76,7 @@ exports.postRecepie = (req, res, next) => {
         error.statusCode = 404;
         throw error;
     }
-    const imageUrl = image.path;
+    const imageUrl = path.basename(image.path);
 
     Recepie.create({
         recepieName: recepieName,
@@ -119,7 +123,7 @@ exports.deleteRecepie = (req, res, next) => {
             error.statusCode = 404;
             throw error;
         }
-        file.deleteFile(recepie.imageUrl);
+        file.deleteFile(config.images_dir + recepie.imageUrl);
         Recepie.destroy({
             where: {
                 id: recepieId
@@ -177,7 +181,7 @@ exports.editeRecepie = (req, res, next) => {
         });
 
         if (image) {
-            recepie.imageUrl = image.path;
+            recepie.imageUrl = path.basename(image.path);
         }
         return recepie.save();
     }).then(result => {
