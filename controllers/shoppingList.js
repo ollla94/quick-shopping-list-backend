@@ -5,19 +5,63 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
 exports.getShoppingList = (req, res, next) => {
-    ListIngredient.findAll()
-        .then(listIngredient => {
-            if (!listIngredient) {
-                const error = new Error('could not find shopping list');
-                error.statusCode(404);
-                throw error;
+    const listId = req.params.id;
+    ListIngredient.findAll(
+        {
+            where: {
+                shoppingListId: listId
             }
-            res.status(200)
-                .json({
-                    message: 'Fetched posts successfully.',
-                    listIngredient: listIngredient
-                });
+        }
+    ).then(listIngredient => {
+        if (!listIngredient) {
+            const error = new Error('could not find shopping list');
+            error.statusCode(404);
+            throw error;
+        }
+        res.status(200)
+            .json({
+                message: 'Fetched list successfully.',
+                listIngredient: listIngredient
+            });
+    })
+        .catch(err => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        });
+};
+
+exports.deleteShoppingListIngredient = (req, res, next) => {
+    const listId = req.params.id;
+    const ingredientId = req.body.id;
+
+    console.log(ingredientId);
+
+    ListIngredient.findOne(
+        {
+            where: {
+                shoppingListId: listId,
+                id: ingredientId
+            }
+        }
+    ).then(listIngredient => {
+        if (!listIngredient) {
+            const error = new Error('could not find ingredient');
+            error.statusCode = 404;
+            throw error;
+        }
+        ListIngredient.destroy({
+            where: {
+                shoppingListId: listId,
+                id: ingredientId
+            }
         })
+        res.status(200)
+            .json({
+                message: 'Deleted sucssesfully.'
+            });
+    })
         .catch(err => {
             if (!err.statusCode) {
                 err.statusCode = 500;
@@ -27,6 +71,7 @@ exports.getShoppingList = (req, res, next) => {
 };
 
 exports.postShoppingList = (req, res, next) => {
+    const listId = req.params.id;
     const ingredients = req.body;
 
     if (!ingredients) {
@@ -35,56 +80,27 @@ exports.postShoppingList = (req, res, next) => {
         throw error;
     }
 
-    ingredients.map((ingredient) => {
-        ListIngredient.findOrCreate({
-            where: {
-                [Op.and]: { name: ingredient.name, unit: ingredient.unit }
-            },
-            defaults: { quantity: ingredient.quantity, name: ingredient.name, unit: ingredient.unit }
-        }).then(([listIngredient, created]) => {
-            if (!created) {
-                listIngredient.quantity = Number(listIngredient.quantity) + Number(ingredient.quantity)
-                return listIngredient.save();
-            }
-        })
-            .catch(err => {
-                if (!err.statusCode) {
-                    err.statusCode = 500;
-                }
-                next(err);
-            });
-    });
-    return res.status(200).json({ message: 'sucsses' })
-};
-
-exports.deleteShoppingList = (req, res, next) => {
-    const listId = req.params.id;
-
-    ShoppingList.findOne({
+    ShoppingList.findOrCreate({
         where: {
             id: listId
         }, include: [ListIngredient]
     }).then(shoppingList => {
-        if (!shoppingList) {
-            const error = new Error('could not find shopping list');
-            error.statusCode = 404;
-            throw error;
-        }
-        ShoppingList.destroy({
-            where: {
-                id: listId
+        ingredients.map(ingredient => {
+            const foundIngredient = shoppingList[0].listIngredients.find(listIngredient => (listIngredient.name === ingredient.name) && (listIngredient.unit === ingredient.unit));
+            if (foundIngredient) {
+                foundIngredient.quantity = Number(foundIngredient.quantity) + Number(ingredient.quantity);
+                foundIngredient.save();
+            } else {
+                shoppingList[0].createListIngredient(ingredient);
             }
-        });
-        console.log('usunieto');
-        res.
-            status(200).
-            json({ message: 'sucssesfully deleted' })
+        })
     }).catch(err => {
         if (!err.statusCode) {
             err.statusCode = 500;
         }
         next(err);
     });
+    return res.status(200).json({ message: 'sucsses' })
 };
 
 exports.editeShoppingList = (req, res, next) => {

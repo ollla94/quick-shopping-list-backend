@@ -5,9 +5,9 @@ const shoppingListController = require('../controllers/shoppingList');
 
 const router = express.Router();
 
-router.get('/shopping-list', shoppingListController.getShoppingList);
+router.get('/shopping-list/:id', shoppingListController.getShoppingList);
 
-router.post('/shopping-list', [
+router.post('/shopping-list/:id', [
     body('name')
         .trim()
         .isAlpha()
@@ -41,6 +41,6 @@ router.put('/shopping-list/:id', [
         .withMessage('Quantity must be a number')
 ], shoppingListController.editeShoppingList);
 
-router.delete('/shopping-list/:id', shoppingListController.deleteShoppingList);
+router.delete('/shopping-list/:id', shoppingListController.deleteShoppingListIngredient);
 
 module.exports = router;
