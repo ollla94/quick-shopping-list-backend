@@ -1,7 +1,7 @@
 {
   "name": "quick-shopping",
   "version": "1.0.0",
-  "description": "",
+  "description": "Quick Shopping List",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -20,5 +20,13 @@
   },
   "devDependencies": {
     "nodemon": "^1.19.4"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ollla94/quick-shopping-list-backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ollla94/quick-shopping-list-backend/issues"
+  },
+  "homepage": "https://github.com/ollla94/quick-shopping-list-backend#readme"
 }
