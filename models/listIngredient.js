@@ -9,6 +9,9 @@ const ListIngredient = sequelize.define('listIngredient', {
         allowNull: false,
         primaryKey: true
     },
+    orderId: {
+        type: Sequelize.INTEGER
+    },
     name: {
         type: Sequelize.STRING,
         allowNull: false

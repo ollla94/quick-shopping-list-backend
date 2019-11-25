@@ -8,7 +8,12 @@ const ShoppingList = sequelize.define('shoppingList', {
         autoIncrement: true,
         allowNull: false,
         primaryKey: true
+    },
+    listName: {
+        type: Sequelize.STRING,
+        allowNull: true
     }
 });
 
 module.exports = ShoppingList;
+

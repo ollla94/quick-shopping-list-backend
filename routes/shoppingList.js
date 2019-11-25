@@ -7,39 +7,9 @@ const router = express.Router();
 
 router.get('/shopping-list/:id', shoppingListController.getShoppingList);
 
-router.post('/shopping-list/:id', [
-    body('name')
-        .trim()
-        .isAlpha()
-        .isLength({ min: 10, max: 25 })
-        .withMessage('Name must be between 2 - 25 letters long'),
-    body('unit')
-        .trim()
-        .isAlpha()
-        .isLength({ min: 10, max: 25 })
-        .withMessage('Unit must be between 2 - 25 letters long'),
-    body('quantity')
-        .trim()
-        .isNumeric()
-        .withMessage('Quantity must be a number')
-], shoppingListController.postShoppingList);
+router.post('/shopping-list/:id', shoppingListController.postShoppingList);
 
-router.put('/shopping-list/:id', [
-    body('name')
-        .trim()
-        .isAlpha()
-        .isLength({ min: 10, max: 25 })
-        .withMessage('Name must be between 2 - 25 letters long'),
-    body('unit')
-        .trim()
-        .isAlpha()
-        .isLength({ min: 10, max: 25 })
-        .withMessage('Unit must be between 2 - 25 letters long'),
-    body('quantity')
-        .trim()
-        .isNumeric()
-        .withMessage('Quantity must be a number')
-], shoppingListController.editeShoppingList);
+router.put('/shopping-list/:id', shoppingListController.editShoppingList);
 
 router.delete('/shopping-list/:id', shoppingListController.deleteShoppingListIngredient);
 
