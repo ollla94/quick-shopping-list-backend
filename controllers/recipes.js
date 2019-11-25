@@ -1,6 +1,6 @@
 const path = require('path');
 
-const Recepie = require('../models/recepie');
+const Recipe = require('../models/recipe');
 const Ingredient = require('../models/ingredient');
 const file = require('../file');
 
@@ -8,12 +8,12 @@ const config = require('../config.json');
 
 const { validationResult } = require('express-validator');
 
-exports.getRecepies = (req, res, next) => {
+exports.getRecipes = (req, res, next) => {
 
-    Recepie.findAll({ include: [Ingredient] })
-        .then(recepies => {
-            if (!recepies) {
-                const error = new Error('could not find recepies');
+    Recipe.findAll({ include: [Ingredient] })
+        .then(recipes => {
+            if (!recipes) {
+                const error = new Error('could not find recipes');
                 error.statusCode(404);
                 throw error;
             }
@@ -21,7 +21,7 @@ exports.getRecepies = (req, res, next) => {
                 .status(200)
                 .json({
                     message: 'Fetched posts successfully.',
-                    recepies: recepies
+                    recipes: recipes
                 });
         })
         .catch(err => {
@@ -32,16 +32,16 @@ exports.getRecepies = (req, res, next) => {
         });
 };
 
-exports.getRecepie = (req, res, next) => {
-    const recepieId = req.params.id;
+exports.getRecipe = (req, res, next) => {
+    const recipeId = req.params.id;
 
-    Recepie.findOne({
+    Recipe.findOne({
         where: {
-            id: recepieId
+            id: recipeId
         }, include: [Ingredient]
-    }).then(recepie => {
-        if (!recepie) {
-            const error = new Error('could not find recepie');
+    }).then(recipe => {
+        if (!recipe) {
+            const error = new Error('could not find recipe');
             error.statusCode = 404;
             throw error;
         }
@@ -49,7 +49,7 @@ exports.getRecepie = (req, res, next) => {
             .status(200)
             .json({
                 message: 'Fetched posts successfully.',
-                recepie: recepie
+                recipe: recipe
             });
     }).catch(error => {
         if (!error.statusCode) {
@@ -59,7 +59,7 @@ exports.getRecepie = (req, res, next) => {
     });
 };
 
-exports.postRecepie = (req, res, next) => {
+exports.postRecipe = (req, res, next) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -68,7 +68,7 @@ exports.postRecepie = (req, res, next) => {
         throw error;
     }
     const image = req.file;
-    const recepieName = req.body.recepieName;
+    const recipeName = req.body.recipeName;
     const ingredients = req.body.ingredients;
 
     if (!image) {
@@ -78,12 +78,12 @@ exports.postRecepie = (req, res, next) => {
     }
     const imageUrl = path.basename(image.path);
 
-    Recepie.create({
-        recepieName: recepieName,
+    Recipe.create({
+        recipeName: recipeName,
         imageUrl: imageUrl
-    }).then(recepie => {
-        if (!recepie) {
-            const error = new Error('recepie creation failed');
+    }).then(recipe => {
+        if (!recipe) {
+            const error = new Error('recipe creation failed');
             error.statusCode = 404;
             throw error;
         }
@@ -94,14 +94,14 @@ exports.postRecepie = (req, res, next) => {
         }
         ingredients.map((ingredient) => {
             const JSONingredient = JSON.parse(ingredient);
-            recepie.createIngredient({
+            recipe.createIngredient({
                 name: JSONingredient.name,
                 quantity: JSONingredient.quantity,
                 unit: JSONingredient.unit
             })
         });
-    }).then(recepie => {
-        res.status(200).json({ message: 'sucsses', recepie: recepie })
+    }).then(recipe => {
+        res.status(200).json({ message: 'sucsses', recipe: recipe })
     }).catch(error => {
         if (!error.statusCode) {
             error.statusCode = 500;
@@ -110,23 +110,23 @@ exports.postRecepie = (req, res, next) => {
     });
 };
 
-exports.deleteRecepie = (req, res, next) => {
-    const recepieId = req.params.id;
+exports.deleteRecipe = (req, res, next) => {
+    const recipeId = req.params.id;
 
-    Recepie.findOne({
+    Recipe.findOne({
         where: {
-            id: recepieId
+            id: recipeId
         }, include: [Ingredient]
-    }).then(recepie => {
-        if (!recepie) {
-            const error = new Error('could not find recepie');
+    }).then(recipe => {
+        if (!recipe) {
+            const error = new Error('could not find recipe');
             error.statusCode = 404;
             throw error;
         }
-        file.deleteFile(config.images_dir + recepie.imageUrl);
-        Recepie.destroy({
+        file.deleteFile(config.images_dir + recipe.imageUrl);
+        Recipe.destroy({
             where: {
-                id: recepieId
+                id: recipeId
             }
         });
         res.
@@ -140,10 +140,10 @@ exports.deleteRecepie = (req, res, next) => {
     });
 };
 
-exports.editeRecepie = (req, res, next) => {
-    const recepieId = req.params.id;
+exports.editeRecipe = (req, res, next) => {
+    const recipeId = req.params.id;
     const image = req.file;
-    const recepieName = req.body.recepieName;
+    const recipeName = req.body.recipeName;
     const ingredients = req.body.ingredients;
 
     const errors = validationResult(req);
@@ -153,27 +153,27 @@ exports.editeRecepie = (req, res, next) => {
         throw error;
     }
 
-    Recepie.findOne({
+    Recipe.findOne({
         where: {
-            id: recepieId
+            id: recipeId
         }, include: [Ingredient]
-    }).then(recepie => {
-        if (!recepie) {
-            const error = new Error('could not find recepie');
+    }).then(recipe => {
+        if (!recipe) {
+            const error = new Error('could not find recipe');
             error.statusCode = 404;
             throw error;
         }
-        recepie.recepieName = recepieName;
+        recipe.recipeName = recipeName;
 
         Ingredient.destroy({
             where: {
-                recepieId: recepieId
+                recipeId: recipeId
             }
         });
 
         ingredients.map((ingredient) => {
             const JSONingredient = JSON.parse(ingredient);
-            recepie.createIngredient({
+            recipe.createIngredient({
                 name: JSONingredient.name,
                 quantity: JSONingredient.quantity,
                 unit: JSONingredient.unit
@@ -181,11 +181,11 @@ exports.editeRecepie = (req, res, next) => {
         });
 
         if (image) {
-            recepie.imageUrl = path.basename(image.path);
+            recipe.imageUrl = path.basename(image.path);
         }
-        return recepie.save();
+        return recipe.save();
     }).then(result => {
-        res.status(200).json({ message: 'Recepie updated!', post: result });
+        res.status(200).json({ message: 'Recipe updated!', post: result });
     }).catch(error => {
         if (!error.statusCode) {
             error.statusCode = 500;

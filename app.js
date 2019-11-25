@@ -5,10 +5,10 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const config = require('./config.json');
 
-const recepiesRoutes = require('./routes/recepies');
+const recipesRoutes = require('./routes/recipes');
 const shoppingListRoutes = require('./routes/shoppingList');
 
-const Recepie = require('./models/recepie');
+const Recipe = require('./models/recipe');
 const Ingredeint = require('./models/ingredient');
 const ListIngredient = require('./models/listIngredient');
 const ShoppingList = require('./models/shoppingList');
@@ -50,7 +50,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(recepiesRoutes);
+app.use(recipesRoutes);
 app.use(shoppingListRoutes);
 
 app.use((error, req, res, next) => {
@@ -61,8 +61,8 @@ app.use((error, req, res, next) => {
   res.status(status).json({ message: message, data: data });
 });
 
-Recepie.hasMany(Ingredeint);
-Ingredeint.belongsTo(Recepie);
+Recipe.hasMany(Ingredeint);
+Ingredeint.belongsTo(Recipe);
 ShoppingList.hasMany(ListIngredient);
 ListIngredient.belongsTo(ShoppingList);
 

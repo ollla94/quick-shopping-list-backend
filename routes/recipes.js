@@ -1,30 +1,30 @@
 const express = require('express');
 const { body } = require('express-validator');
 
-const recepiesController = require('../controllers/recepies');
+const recipesController = require('../controllers/recipes');
 
 const router = express.Router();
 
-router.get('/recepies', recepiesController.getRecepies);
-router.get('/recepie/:id', recepiesController.getRecepie);
+router.get('/recipes', recipesController.getRecipes);
+router.get('/recipe/:id', recipesController.getRecipe);
 
-router.post('/recepie',
+router.post('/recipe',
     [
-        body('recepieName')
+        body('recipeName')
             .trim()
             .isLength({ min: 2, max: 50 })
             .withMessage('Name must be between 2 - 50 letters long')
     ],
-    recepiesController.postRecepie);
+    recipesController.postRecipe);
 
-router.put('/recepie/:id', [
-    body('recepieName')
+router.put('/recipe/:id', [
+    body('recipeName')
         .trim()
         .isString()
         .isLength({ min: 10, max: 50 })
         .withMessage('Name must be between 2 - 50 letters long')
-], recepiesController.editeRecepie);
+], recipesController.editeRecipe);
 
-router.delete('/recepie/:id', recepiesController.deleteRecepie);
+router.delete('/recipe/:id', recipesController.deleteRecipe);
 
 module.exports = router;

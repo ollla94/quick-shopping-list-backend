@@ -2,14 +2,14 @@ const Sequelize = require('sequelize');
 
 const sequelize = require('../database');
 
-const Recepie = sequelize.define('recepie', {
+const Recipe = sequelize.define('recipe', {
     id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         allowNull: false,
         primaryKey: true
     },
-    recepieName: {
+    recipeName: {
         type: Sequelize.STRING,
         allowNull: false
     },
@@ -19,4 +19,4 @@ const Recepie = sequelize.define('recepie', {
     }
 });
 
-module.exports = Recepie;
+module.exports = Recipe;
