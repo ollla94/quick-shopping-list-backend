@@ -1,25 +1,37 @@
 const ShoppingList = require('../models/shoppingList');
 const ListIngredient = require('../models/listIngredient');
+const User = require('../models/user');
 
 exports.getShoppingList = (req, res, next) => {
-    const listId = req.params.id;
+    const userId = req.params.userId;
 
-    ListIngredient.findAll({
+    ShoppingList.findOne({
         where: {
-            shoppingListId: listId
-        },
-        order: [['orderId', 'ASC']]
-    }).then(listIngredient => {
-        if (!listIngredient) {
-            const error = new Error('Could not find shopping list.');
-            error.statusCode(400);
+            userId: userId
+        }
+    }).then(shoppingList => {
+        if (!shoppingList) {
+            const error = new Error('No shopping list created yet.');
+            error.statusCode = 400;
             throw error;
         }
-
-        res.status(200).json({
-            message: 'Fetched list successfully.',
-            listIngredient: listIngredient
-        });
+        ListIngredient.findAll({
+            where: {
+                shoppingListId: shoppingList.id
+            },
+            order: [['orderId', 'ASC']]
+        }).then(listIngredient => {
+            if (!listIngredient) {
+                const error = new Error('Could not find shopping list.');
+                error.statusCode = 400;
+                throw error;
+            }
+            res.status(200).json({
+                message: 'Fetched list successfully.',
+                listIngredient: listIngredient,
+                shoppingListId: shoppingList.id
+            });
+        })
     }).catch(err => {
         if (!err.statusCode) {
             err.statusCode = 500;
@@ -71,8 +83,8 @@ exports.deleteShoppingListIngredient = (req, res, next) => {
 };
 
 exports.postShoppingList = (req, res, next) => {
-    const listId = req.params.id;
-    const ingredients = req.body;
+    const ingredients = req.body.ingredients;
+    const userId = req.params.userId;
 
     if (!ingredients) {
         const error = new Error('Shopping list creation failed.');
@@ -82,13 +94,13 @@ exports.postShoppingList = (req, res, next) => {
 
     ShoppingList.findOrCreate({
         where: {
-            id: listId
+            userId: userId
         }, include: [ListIngredient]
     }).then(([shoppingList, created]) => {
         if (!created) {
             ListIngredient.max('orderId', {
                 where: {
-                    shoppingListId: listId
+                    shoppingListId: shoppingList.id
                 }
             }).then(order => {
                 if (isNaN(order)) {
@@ -117,15 +129,19 @@ exports.postShoppingList = (req, res, next) => {
             })
         } else {
             let order = 0;
-            return Promise.all(ingredients.map(ingredient => {
-                order = order + 1
-                shoppingList.createListIngredient({
-                    orderId: order,
-                    name: ingredient.name,
-                    quantity: ingredient.quantity,
-                    unit: ingredient.unit
+            User.findOne({ where: { id: userId } }).then(user => {
+                user.createShoppingList().then(shoppingList => {
+                    return Promise.all(ingredients.map(ingredient => {
+                        order = order + 1
+                        shoppingList.createListIngredient({
+                            orderId: order,
+                            name: ingredient.name,
+                            quantity: ingredient.quantity,
+                            unit: ingredient.unit
+                        })
+                    }))
                 })
-            })).then(() => {
+            }).then(() => {
                 res.status(200).json({
                     message: 'Added sucssesfully.'
                 })

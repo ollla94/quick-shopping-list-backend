@@ -1,16 +1,16 @@
 const express = require('express');
-const { body } = require('express-validator');
 
 const shoppingListController = require('../controllers/shoppingList');
+const isAuth = require('../middleware/is-auth');
 
 const router = express.Router();
 
-router.get('/shopping-list/:id', shoppingListController.getShoppingList);
+router.get('/shopping-list/:userId', isAuth, shoppingListController.getShoppingList);
 
-router.post('/shopping-list/:id', shoppingListController.postShoppingList);
+router.post('/shopping-list/:userId', isAuth, shoppingListController.postShoppingList);
 
-router.put('/shopping-list/:id', shoppingListController.editShoppingList);
+router.put('/shopping-list/:id', isAuth, shoppingListController.editShoppingList);
 
-router.delete('/shopping-list/:id', shoppingListController.deleteShoppingListIngredient);
+router.delete('/shopping-list/:id', isAuth, shoppingListController.deleteShoppingListIngredient);
 
 module.exports = router;

@@ -2,13 +2,14 @@ const express = require('express');
 const { body } = require('express-validator');
 
 const recipesController = require('../controllers/recipes');
+const isAuth = require('../middleware/is-auth');
 
 const router = express.Router();
 
 router.get('/recipes', recipesController.getRecipes);
 router.get('/recipe/:id', recipesController.getRecipe);
 
-router.post('/recipe',
+router.post('/recipe', isAuth,
     [
         body('recipeName')
             .trim()
@@ -17,7 +18,7 @@ router.post('/recipe',
     ],
     recipesController.postRecipe);
 
-router.put('/recipe/:id', [
+router.put('/recipe/:id', isAuth,[
     body('recipeName')
         .trim()
         .isString()
@@ -25,6 +26,6 @@ router.put('/recipe/:id', [
         .withMessage('Name must be between 2 - 50 letters long')
 ], recipesController.editeRecipe);
 
-router.delete('/recipe/:id', recipesController.deleteRecipe);
+router.delete('/recipe/:id', isAuth, recipesController.deleteRecipe);
 
 module.exports = router;
