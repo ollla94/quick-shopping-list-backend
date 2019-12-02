@@ -49,24 +49,23 @@ exports.postLogin = (req, res, next) => {
             throw error;
         }
         loadedUser = user;
-        bcrypt.compare(password, user.password)
-            .then(match => {
-                if (match) {
-                    const token = jwt.sign(
-                        {
-                            login: loadedUser.login,
-                            id: loadedUser.id
-                        },
-                        config.secret,
-                        { expiresIn: '1h' }
-                    );
-                    res.status(200).json({ message: 'logged in', token: token, user: user })
-                } else {
-                    const error = new Error('Password is incorect.');
-                    error.statusCode = 401;
-                    throw error;
-                }
-            })
+        return bcrypt.compare(password, user.password)
+    }).then(match => {
+        if (match) {
+            const token = jwt.sign(
+                {
+                    login: loadedUser.login,
+                    id: loadedUser.id
+                },
+                config.secret,
+                { expiresIn: '1h' }
+            );
+            res.status(200).json({ message: 'logged in', token: token, user: loadedUser })
+        } else {
+            const error = new Error('Password is incorect.');
+            error.statusCode = 401;
+            throw error;
+        }
     }).catch(error => {
         if (!error.statusCode) {
             error.statusCode = 500;
