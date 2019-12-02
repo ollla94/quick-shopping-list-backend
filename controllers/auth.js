@@ -17,20 +17,18 @@ exports.postSingup = async (req, res, next) => {
             error.statusCode = (401);
             throw error;
         }
-        User.create({
+        return User.create({
             login: login,
             password: hashedPasswored
-        }).then(user => {
-            res.status(200).json({ message: 'sucsses', userId: user.id })
         })
-            .catch(error => {
-                if (!error.statusCode) {
-                    error.statusCode = 500;
-                }
-                next(error);
-            });
+    }).then(user => {
+        res.status(200).json({ message: 'sucsses', userId: user.id })
+    }).catch(error => {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
     });
-
 };
 
 exports.postLogin = (req, res, next) => {
