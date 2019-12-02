@@ -21,7 +21,7 @@ exports.postSingup = async (req, res, next) => {
             login: login,
             password: hashedPasswored
         }).then(user => {
-            res.status(200).json({ message: 'sucsses', userId: user.id, shoppingListId: shoppingList.id })
+            res.status(200).json({ message: 'sucsses', userId: user.id })
         })
             .catch(error => {
                 if (!error.statusCode) {
